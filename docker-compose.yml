@@ -1,0 +1,38 @@
+data:
+  image: busybox
+  volumes:
+    - ./volumes/ghost:/var/lib/ghost
+
+server:
+  image: jwilder/nginx-proxy
+  restart: always
+  ports:
+    - "80:80"
+    - "443:443"
+  volumes:
+    - /var/run/docker.sock:/tmp/docker.sock:ro
+    - ./certs/unified:/etc/nginx/certs
+
+blog:
+  image: ghost
+  restart: always
+  volumes_from:
+    - data
+  env_file:
+    - config.env
+    - secret.env
+  environment:
+   - VIRTUAL_HOST=www.example.com,example.com
+   - CERT_NAME=www.example.com
+
+devblog:
+  image: ghost
+  restart: always
+  volumes_from:
+    - data
+  env_file:
+    - config.env
+    - secret.env
+  environment:
+    - VIRTUAL_HOST=dev.example.com
+    - NODE_ENV=development
